@@ -29,7 +29,7 @@ class confi
     public:
         std::deque<server> servers;
         void    split_string(std::string &, location &lc, char c);
-        int     setup_configuration(std::string);
+        int     parse_configuration(std::string);
 };
 
 #endif

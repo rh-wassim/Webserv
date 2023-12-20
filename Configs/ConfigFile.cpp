@@ -1,6 +1,6 @@
 #include "Config.hpp"
 
-int      check_is_digit(char *n)
+int      ft_isdigit(char *n)
 {
     int i = 0;
     int num;
@@ -8,7 +8,7 @@ int      check_is_digit(char *n)
     {
         if (!isdigit(n[i]))
         {
-            std::cout << "This is Not a Number\n";
+            std::cout << "Not a number\n";
             exit(1);
         }
         i++;
@@ -17,7 +17,7 @@ int      check_is_digit(char *n)
     return (num);
 }
 
-void    confi::split_string(std::string &str, location &lc, char c)
+void    confi::split_string(std::string &str, location &loc, char c)
 {
     char *word = strtok(const_cast<char *>(str.c_str()), " ");
 
@@ -25,9 +25,9 @@ void    confi::split_string(std::string &str, location &lc, char c)
     while (word)
     {
         if (c == 'm' && (!strcmp(word, "GET") || !strcmp(word, "POST") || !strcmp(word, "DELETE")))
-            lc.allow_methods.push_back(word);
+            loc.allow_methods.push_back(word);
         else if (c == 'i')
-            lc.index.push_back(word);
+            loc.index.push_back(word);
         else
         {
             std::cerr << "You must Follow Our Rules in Methods\n";
@@ -46,7 +46,7 @@ void     parse_host(std::string host)
     n = strtok(const_cast<char *>(host.c_str()), ".");
     while (n != NULL)
     {
-        num = check_is_digit(n);
+        num = ft_isdigit(n);
         if (num < 0 || num > 255)
         {
             std::cout << "Out of Range\n";
@@ -57,38 +57,38 @@ void     parse_host(std::string host)
     }
     if (i != 4)
     {
-        std::cout << "Error: This is Not IPv4\n";
+        std::cout << "Error: Not IPv4\n";
         exit(1);
     }
 }
 
-int     confi::setup_configuration(std::string file)
+int     confi::parse_configuration(std::string file)
 {
-    std::fstream congi_file;
+    std::fstream config_file;
     std::string line, key, value;
-    struct server sr;
-    struct location lc;
+    struct server serv;
+    struct location loc;
     int i = -1;
     int j = -1;
-    congi_file.open(file);
-    if (congi_file.is_open())
+    config_file.open(file);
+    if (config_file.is_open())
     {
-        congi_file.seekg(0, std::ios::end);
-        if (congi_file.tellg() == 0)
+        config_file.seekg(0, std::ios::end);
+        if (config_file.tellg() == 0)
         {
             std::cout << "Error : Config File is Empty\n";
             exit(1);
         }
-        congi_file.seekg(0, std::ios::beg);
-        while (getline(congi_file, line))
+        config_file.seekg(0, std::ios::beg);
+        while (getline(config_file, line))
         {
             i = -1;
             if (!line.compare("server"))
             {
                 i = 0;
                 j = -1;
-                sr.mx_cl_bd_size = 1000000;
-                while (getline(congi_file, line))
+                serv.mx_cl_bd_size = 1000000;
+                while (getline(config_file, line))
                 {
                     std::stringstream strm(line);
                     strm >> key;
@@ -103,10 +103,10 @@ int     confi::setup_configuration(std::string file)
                             std::cerr << "Error : location Path\n";
                             exit(1);
                         }
-                        lc.path_location = value;
-                        lc.auto_index = "on";
-                        lc.auto_upload = "on";
-                        while (getline(congi_file, line))
+                        loc.path_location = value;
+                        loc.auto_index = "on";
+                        loc.auto_upload = "on";
+                        while (getline(config_file, line))
                         {
                             std::string key_local, value_local;
                             std::stringstream strm_local(line);
@@ -120,32 +120,32 @@ int     confi::setup_configuration(std::string file)
                             else if (!line.compare("}"))
                             {
                                 j--;
-                                sr.locations.push_back(lc);
-                                lc.allow_methods.clear();
-                                lc.index.clear();
-                                lc.path_location.clear();
-                                lc.root.clear();
-                                lc.auto_upload.clear();
-                                lc.auto_index.clear();
-                                lc.redirection.clear();
+                                serv.locations.push_back(loc);
+                                loc.allow_methods.clear();
+                                loc.index.clear();
+                                loc.path_location.clear();
+                                loc.root.clear();
+                                loc.auto_upload.clear();
+                                loc.auto_index.clear();
+                                loc.redirection.clear();
                                 break;
                             }
                             if (!key_local.compare("allow_methods"))
-                                split_string(line, lc, 'm');
+                                split_string(line, loc, 'm');
                             else if (!key_local.compare("index"))
-                                split_string(line, lc, 'i');
+                                split_string(line, loc, 'i');
                             else if (!key_local.compare("root") && strm_local.eof()  && !value_local.empty())
-                                lc.root = value_local;
+                                loc.root = value_local;
                             else if (!key_local.compare("auto_upload") && strm_local.eof() && !value_local.empty())
-                                lc.auto_upload = value_local;
+                                loc.auto_upload = value_local;
                             else if (!key_local.compare("upload_path") && strm_local.eof() && !value_local.empty())
-                                lc.upload_path = value_local;
+                                loc.upload_path = value_local;
                             else if (!key_local.compare("auto_index") && strm_local.eof() && !value_local.empty())
-                                lc.auto_index = value_local;
+                                loc.auto_index = value_local;
                             else if (!key_local.compare("return") && strm_local.eof() && !value_local.empty())
-                                lc.redirection = value_local;
+                                loc.redirection = value_local;
                             else if (!key_local.compare("cgi_path") && strm_local.eof() && !value_local.empty())
-                                lc.cgi_path = value_local;
+                                loc.cgi_path = value_local;
                             else
                             {
                                 std::cerr << "You must Follow Our Rules in Location" << std::endl;
@@ -161,37 +161,37 @@ int     confi::setup_configuration(std::string file)
                     }
                     else if (!line.compare("}"))
                     {
-                        if ((sr.host.empty() && sr.server_name.empty()) || sr.port.empty() || sr.locations.empty())
+                        if ((serv.host.empty() && serv.server_name.empty()) || serv.port.empty() || serv.locations.empty())
                         {
                             std::cerr << "You must Follow Our Rules" << std::endl;
                             exit(1);
                         }
-                        servers.push_back(sr);
-                        sr.err_pages.clear();
-                        sr.locations.clear();
+                        servers.push_back(serv);
+                        serv.err_pages.clear();
+                        serv.locations.clear();
                         i--;
                         break;
                     }
                     else if (!key.compare("host") && strm.eof() && !value.empty())
                     {
                         parse_host(value);
-                        sr.host = value;
+                        serv.host = value;
                     }
                     else if (!key.compare("port") && strm.eof() && !value.empty())
                     {
-                        int num_port;
-                        num_port = check_is_digit(const_cast<char *>(value.c_str()));
-                        if (num_port < 0 || num_port > 65535)
+                        int port_num;
+                        port_num = ft_isdigit(const_cast<char *>(value.c_str()));
+                        if (port_num < 0 || port_num > 65535)
                         {
                             std::cout << "Error in Port\n";
                             exit(1);
                         }
-                        sr.port = value;
+                        serv.port = value;
                     }
                     else if (!key.compare("max_client_body_size") && strm.eof() && !value.empty())
-                        sr.mx_cl_bd_size = std::atoi(value.c_str());
+                        serv.mx_cl_bd_size = std::atoi(value.c_str());
                     else if (!key.compare("server_name"))
-                        sr.server_name = value;
+                        serv.server_name = value;
                     else if (!key.compare("error_page"))
                     {
                         if (strm.eof())
@@ -200,7 +200,7 @@ int     confi::setup_configuration(std::string file)
                         if (!strm.eof()) {
                             std::cerr << "You must Follow Our Rules" << std::endl;
                         }
-                            sr.err_pages[value] = key;
+                            serv.err_pages[value] = key;
                     }
                     else
                     {
@@ -215,8 +215,6 @@ int     confi::setup_configuration(std::string file)
                 exit(1);
             }
         }
-
-        //adding
 
     }
     else
@@ -237,6 +235,6 @@ int main(int ac , char **av)
         exit (1);
     }
     confi cfg;
-    cfg.setup_configuration(av[1]);
+    cfg.parse_configuration(av[1]);
     std::cout << "---OK---\n";
 }
